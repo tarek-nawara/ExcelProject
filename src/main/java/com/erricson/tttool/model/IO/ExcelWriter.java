@@ -12,40 +12,40 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.erricson.tttool.model.entities.ExcelEntity;
+import com.erricson.tttool.model.entities.ExcelRecord;
 
 public class ExcelWriter {
-	// ------------------||
-	// class variables --||
-	// ------------------||
 	private static final Logger LOG = Logger.getLogger(ExcelWriter.class);
+    private static final int COLUMN_NUM = 5;
+
 	static {
 		BasicConfigurator.configure();
 	}
-	private static final int COLUMN_NUM = 5;
 
-	// ---------------------||
-	// instance variables --||
-	// ---------------------||
+
 	private String destinationFilePath;
 	private XSSFWorkbook workBook;
 	private XSSFSheet spreadSheet;
 
+    private void Initialize(String destinationFilePath) {
+        this.destinationFilePath = destinationFilePath;
+        this.workBook = new XSSFWorkbook();
+        this.spreadSheet = workBook.createSheet();
+    }
+
 	public void open(String destinationFilePath) {
-		this.destinationFilePath = destinationFilePath;
-		this.workBook = new XSSFWorkbook();
-		this.spreadSheet = workBook.createSheet();
+        Initialize(destinationFilePath);
 		Row headerRow = spreadSheet.createRow(0);
 		createCells(headerRow, "Number", "Affected CI", "Title Comment",
 				"Description Comment", "Criteria");
 	}
-	
-	public boolean write(ExcelEntity entity) {
-		
+
+    public boolean write(ExcelRecord entity) {
+		return false;
 	}
 	
 	public boolean write(String destinationFilePath,
-			List<ExcelEntity> entities) {
+			List<ExcelRecord> entities) {
 		boolean result = false;
 		try {
 			FileOutputStream fout = new FileOutputStream(destinationFilePath);
@@ -57,8 +57,8 @@ public class ExcelWriter {
 					"Description Comment", "Criteria");
 			for (int i = 1; i <= entities.size(); ++i) {
 				Row row = spreadSheet.createRow(i);
-				ExcelEntity entity = entities.get(i - 1);
-				createCells(row, entity.getNumber(), entity.getACI(),
+				ExcelRecord entity = entities.get(i - 1);
+				createCells(row, entity.getNumber(), entity.getAci(),
 						entity.getTitleComment(),
 						entity.getDescriptionComment(), entity.getCriteria());
 			}

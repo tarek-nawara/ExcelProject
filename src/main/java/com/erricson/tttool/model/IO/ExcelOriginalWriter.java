@@ -22,26 +22,17 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 
 import com.erricson.tttool.model.entities.Criteria;
 import com.erricson.tttool.model.entities.EntityUtils;
-import com.erricson.tttool.model.entities.ExcelEntity;
+import com.erricson.tttool.model.entities.ExcelRecord;
 import com.erricson.tttool.model.handlers.ExcelEntityProcessor;
 
 public class ExcelOriginalWriter {
-	// --------------------||
-	// class variables ----||
-	// --------------------||
 	private static final Logger LOG = Logger.getLogger(ExcelOriginalWriter.class);
 
-	// --------------------||
-	// instance variables -||
-	// --------------------||
-	private Map<String, Integer> requiredCols;
-	private Map<String, Integer> alreadyExist;
-	private Map<String, Integer> originalCols;
+	private final Map<String, Integer> requiredCols = new HashMap<>();
+	private final Map<String, Integer> alreadyExist = new HashMap<>();
+	private final Map<String, Integer> originalCols = new HashMap<>();
 
 	public ExcelOriginalWriter() {
-		requiredCols = new HashMap<>();
-		alreadyExist = new HashMap<>();
-		originalCols = new HashMap<>();
 		requiredCols.put("Title Comment", -1);
 		requiredCols.put("Description Comment", -1);
 		requiredCols.put("Criteria", -1);
@@ -52,23 +43,23 @@ public class ExcelOriginalWriter {
 		originalCols.put("Affected CI", -1);
 	}
 
-	public boolean write(String sourceFile, Map<String, Criteria> allCriteria) {
+	public boolean write(final String sourceFile, final Map<String, Criteria> allCriteria) {
 		boolean result = false;
 		try {
-			InputStream inputStream = new FileInputStream(sourceFile);
-			XSSFWorkbook workBook = new XSSFWorkbook(inputStream);
-			XSSFSheet spreadSheet = workBook.getSheetAt(0);
-			Row headerRow = spreadSheet.getRow(0);
+			final InputStream inputStream = new FileInputStream(sourceFile);
+			final XSSFWorkbook workBook = new XSSFWorkbook(inputStream);
+			final XSSFSheet spreadSheet = workBook.getSheetAt(0);
+			final Row headerRow = spreadSheet.getRow(0);
 			figureRequiredCols(headerRow);
 			createMissingCols(headerRow, alreadyExist, buildStyle(workBook.createCellStyle()));
-			Iterator<Row> rows = spreadSheet.rowIterator();
+			final Iterator<Row> rows = spreadSheet.rowIterator();
 			if (rows.hasNext()) {
 				rows.next();
 			}
 			while (rows.hasNext()) {
 				Row row = rows.next();
 				createMissingCols(row, buildStyle(workBook.createCellStyle()));
-				ExcelEntity entity = EntityUtils.getEntityFromRow(originalCols, row);
+				ExcelRecord entity = EntityUtils.getEntityFromRow(originalCols, row);
 				ExcelEntityProcessor.processExcelEntity(entity, allCriteria);
 				writeEntity(entity, row);
 			}
@@ -78,7 +69,7 @@ public class ExcelOriginalWriter {
 				}
 				spreadSheet.autoSizeColumn(entry.getValue());
 			}
-			OutputStream out = new FileOutputStream(sourceFile);
+			final OutputStream out = new FileOutputStream(sourceFile);
 			workBook.write(out);
 			workBook.close();
 			result = true;
@@ -88,7 +79,7 @@ public class ExcelOriginalWriter {
 		return result;
 	}
 
-	private void writeEntity(ExcelEntity entity, Row row) {
+	private void writeEntity(ExcelRecord entity, Row row) {
 		for (Entry<String, Integer> entry : alreadyExist.entrySet()) {
 			Cell cell = row.getCell(entry.getValue());
 			String value = "";
@@ -110,12 +101,11 @@ public class ExcelOriginalWriter {
 	}
 	
 	private XSSFCellStyle buildStyle(XSSFCellStyle style) {
-		XSSFColor color = new XSSFColor(IndexedColors.BLACK);
+		XSSFColor color = new XSSFColor();
 		style.setBorderColor(BorderSide.LEFT, color);
 		style.setBorderColor(BorderSide.RIGHT, color);
 		style.setBorderColor(BorderSide.BOTTOM, color);
 		style.setBorderColor(BorderSide.TOP, color);
-		style.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
 		return style;
 	}
 
