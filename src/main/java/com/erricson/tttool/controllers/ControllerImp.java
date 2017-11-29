@@ -17,29 +17,29 @@ import com.erricson.tttool.model.handlers.ExcelEntityProcessor;
 import com.erricson.tttool.view.api.View;
 
 public class ControllerImp implements Controller {
-	private static final Logger LOG = Logger.getLogger(ControllerImp.class);
+    private static final Logger LOG = Logger.getLogger(ControllerImp.class);
 
-	static {
-		 BasicConfigurator.configure();
-	}
+    static {
+        BasicConfigurator.configure();
+    }
 
-	@Override
-	public void start(final View view, final boolean overwriteOriginal, final boolean writeOutside) {
-		LOG.info("start processing the excel sheet");
-		final String criteriaPath = view.getCriteriaPath();
-		final Optional<Map<String, Criteria>> criteriaResult = ExcelCriteriaReader.readCriteria(criteriaPath);
-		if (!criteriaResult.isPresent()) {
-			view.showErrorMessage(NotificationMessage.FAILED_CRITERIA);
-			return;
-		}
+    @Override
+    public void start(final View view, final boolean overwriteOriginal, final boolean writeOutside) {
+        LOG.info("start processing the excel sheet");
+        final String criteriaPath = view.getCriteriaPath();
+        final Optional<Map<String, Criteria>> criteriaResult = ExcelCriteriaReader.readCriteria(criteriaPath);
+        if (!criteriaResult.isPresent()) {
+            view.showErrorMessage(NotificationMessage.FAILED_CRITERIA);
+            return;
+        }
 
-		final Map<String, Criteria> allCriteria = criteriaResult.get();
-		if (overwriteOriginal) {
+        final Map<String, Criteria> allCriteria = criteriaResult.get();
+        if (overwriteOriginal) {
             OverwriteOriginal(view, allCriteria);
         } else if (writeOutside) {
             WriteOutside(view, allCriteria);
         }
-	}
+    }
 
     private void OverwriteOriginal(final View view, final Map<String, Criteria> allCriteria) {
         ExcelOriginalWriter writer = new ExcelOriginalWriter();
